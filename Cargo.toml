@@ -14,3 +14,11 @@ rust-version = "1.94"
 lto = true
 codegen-units = 1
 strip = true
+
+# The tests analyse ~95 s synthetic songs; unoptimised they take minutes.
+# (Optimisation does not change results: Rust never reorders float math.)
+[profile.test]
+opt-level = 3
+
+[profile.dev.package."*"]
+opt-level = 3
