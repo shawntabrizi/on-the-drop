@@ -482,6 +482,7 @@ function wire(): void {
 // --- the frame loop ------------------------------------------------------------------
 
 let lastClock = '';
+let lastSection = '';
 function frame(now: number): void {
   const t = player.visualTime();
   const heard = t + player.userOffset;
@@ -497,9 +498,12 @@ function frame(now: number): void {
     if (clock !== lastClock) {
       lastClock = clock;
       $('clock').textContent = clock;
-      const spans = sectionSpans(label.map);
-      const i = spans.findIndex((s) => heard >= s.start && heard < s.end);
-      $('nowSection').textContent = i >= 0 ? `${label.map.words[i]}${label.user[i] ? ' ✱' : ''}` : '';
+    }
+    const i = sectionSpans(label.map).findIndex((s) => heard >= s.start && heard < s.end);
+    const word = i >= 0 ? `${label.map.words[i]}${label.user[i] ? ' ✱' : ''}` : '';
+    if (word !== lastSection) {
+      lastSection = word;
+      $('nowSection').textContent = word;
     }
   }
   requestAnimationFrame(frame);
