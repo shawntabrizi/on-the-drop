@@ -1,0 +1,11 @@
+[configuration]
+
+entry_symbol = "gdext_rust_init"
+compatibility_minimum = "4.7"
+
+[libraries]
+
+macos.debug = "res://bin/libon_the_drop_godot.macos.arm64.dylib"
+macos.release = "res://bin/libon_the_drop_godot.macos.arm64.dylib"
+linux.debug.arm64 = "res://bin/libon_the_drop_godot.linux.arm64.so"
+linux.release.arm64 = "res://bin/libon_the_drop_godot.linux.arm64.so"

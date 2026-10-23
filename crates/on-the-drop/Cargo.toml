@@ -1,0 +1,9 @@
+[package]
+name = "on-the-drop"
+description = "Beatgrid, phrase and drop analysis (pure Rust core, no Godot dependency)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+publish.workspace = true
+rust-version.workspace = true

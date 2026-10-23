@@ -1,0 +1,22 @@
+; Engine configuration file.
+; on-the-drop spike: loads the GDExtension and checks its calls headless.
+; Godot 4.7.1.
+
+config_version=5
+
+[application]
+
+config/name="on-the-drop spike"
+run/main_scene="res://test/spike.tscn"
+run/flush_stdout_on_print=true
+config/use_custom_user_dir=true
+config/custom_user_dir_name="otd-spike"
+config/features=PackedStringArray("4.7")
+
+[audio]
+
+driver/enable_input=false
+
+[rendering]
+
+renderer/rendering_method="mobile"

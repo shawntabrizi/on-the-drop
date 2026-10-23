@@ -1,0 +1,17 @@
+[package]
+name = "on-the-drop-godot"
+description = "Godot 4.7 GDExtension for on-the-drop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+on-the-drop = { path = "../on-the-drop" }
+# api-4-7: prebuilt Godot 4.7 API; works with 4.7.1 (patch releases keep the API).
+godot = { version = "=0.5.5", default-features = false, features = ["api-4-7"] }

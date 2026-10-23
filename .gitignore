@@ -1,0 +1,7 @@
+/target/
+/.deps/
+/build/
+/godot/.godot/
+/godot/bin/*.so
+/godot/bin/*.dylib
+*.tmp
