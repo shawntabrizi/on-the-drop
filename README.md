@@ -2,8 +2,8 @@
 
 beatgrid, phrase and drop analysis — so your visuals hit on the drop
 
-**Status:** private, pre-release. The whole-song analysis of
-[frame-visualizer](https://github.com/shawntabrizi/frame-visualizer) (master
+**Status:** pre-release; the API changes without notice. The whole-song
+analysis of frame-visualizer, a VR music visualizer for the Steam Frame (master
 2ae8592: `lib/song_overview.gd`, `song_map.gd`, `song_sections.gd`,
 `song_novelty.gd`, `section_overrides.gd`) is ported to Rust and gives the
 same results bit for bit on the same input (`parity/`: 103 inputs, map from
@@ -27,7 +27,7 @@ cargo test -p on-the-drop  # song_map, overrides, track_id tests
 scripts/build.sh all        # godot/bin/*.dylib, *.so (glibc 2.28 target)
 scripts/test_mac.sh         # headless, Dummy audio
 scripts/export_pck.sh       # build/otd-spike.pck
-scripts/frame_check.sh      # on the Frame: ~/apps/otd-spike/, headless, Dummy audio
+FRAME=user@host scripts/frame_check.sh  # on the Frame: ~/apps/otd-spike/, headless, Dummy audio
 ```
 
 ## API

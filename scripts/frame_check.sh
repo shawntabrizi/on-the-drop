@@ -12,10 +12,10 @@
 # A symlink would not work: Linux resolves /proc/self/exe to the real file name.
 #
 # Needs: scripts/build.sh linux-arm64 and scripts/export_pck.sh first.
-# Usage: scripts/frame_check.sh    (FRAME=user@host to override)
+# Usage: FRAME=user@host scripts/frame_check.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
-FRAME="${FRAME:-steamos@192.168.1.169}"
+FRAME="${FRAME:?set FRAME=user@host of the Steam Frame}"
 DEST=apps/otd-spike
 SO=libon_the_drop_godot.linux.arm64.so
 test -f build/otd-spike.pck || { echo "no build/otd-spike.pck; run scripts/export_pck.sh" >&2; exit 1; }
