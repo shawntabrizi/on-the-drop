@@ -14,6 +14,7 @@ LOG=$(mktemp "${TMPDIR:-/tmp}/otd-test.XXXXXX")
 code=$?
 grep -E "otd-spike|ERROR" "$LOG"
 grep -q "otd-spike: PASS" "$LOG" || code=1
+grep -qE "SCRIPT ERROR|panic" "$LOG" && { grep -E "SCRIPT ERROR|panic" "$LOG" | head -3; code=1; }  # an aborted check is no pass
 rm -f "$LOG"
 echo "exit=$code"
 exit $code

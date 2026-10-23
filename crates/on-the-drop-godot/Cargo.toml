@@ -14,4 +14,6 @@ crate-type = ["cdylib"]
 [dependencies]
 on-the-drop = { path = "../on-the-drop" }
 # api-4-7: prebuilt Godot 4.7 API; works with 4.7.1 (patch releases keep the API).
-godot = { version = "=0.5.5", default-features = false, features = ["api-4-7"] }
+# experimental-threads: apps call the static, pure analysis from a worker
+# thread (WorkerThreadPool); without it godot-rust panics off the main thread.
+godot = { version = "=0.5.5", default-features = false, features = ["api-4-7", "experimental-threads"] }

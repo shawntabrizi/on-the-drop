@@ -120,3 +120,17 @@ func _run() -> void:
 	# Why: a false match moves one song's labels onto another.
 	_check(not diff.matched, "another chord and noise: no match (cover %.2f)" % diff.get("cover", 0.0))
 	_check(not (_call("matches", ["not base64!", 1.0, r.fingerprint, r.duration]) as Dictionary).matched, "a broken fingerprint: no match")
+
+	# Why: frame-visualizer analyses on a WorkerThreadPool thread so the
+	# headset never stalls; a call off the main thread must work (godot-rust
+	# panics there without its experimental-threads feature) and give the
+	# same map and record as on the main thread.
+	var out := {}
+	var task := WorkerThreadPool.add_task(func():
+		out.map = _call("analyze", [song, float(RATE)])
+		out.fp = _call("fingerprint", [song, RATE]))
+	WorkerThreadPool.wait_for_task_completion(task)
+	var wm = out.get("map")
+	var wf = out.get("fp")
+	_check(wm is Dictionary and wf is Dictionary and wm.get("beats") == m.beats and wm.get("sections") == m.sections
+		and wf.get("fingerprint") == r.fingerprint, "analyze and fingerprint on a worker thread: the same results")
