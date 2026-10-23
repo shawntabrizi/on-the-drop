@@ -60,6 +60,10 @@ fn analysis_dict(a: &Analysis) -> VarDictionary {
     d.set("bins", &(a.bins.nb as i64).to_variant());
     d.set("bin_s", &a.bins.bin_s.to_variant());
     d.set("analysis", &(on_the_drop::ANALYSIS_VERSION as i64).to_variant());
+    // Analysis-only diagnostics (not in the map file): reports and tests.
+    d.set("part_bounds", &f32s(&a.map.part_bounds));
+    d.set("fixed_tempo", &a.map.fixed_tempo.to_variant());
+    d.set("grid_drift", &a.map.grid_drift.to_variant());
     d
 }
 
@@ -123,6 +127,18 @@ impl OnTheDrop {
             bin_s,
         };
         result(on_the_drop::analyze_bins(bins))
+    }
+
+    /// The raw section changes of band bins on a beat grid (the first
+    /// stage of the map, before the drop pass and the part snapping):
+    /// `[t0, id0, t1, id1, ...]` (frame-visualizer `SongSections.analyse`).
+    #[func]
+    fn sections(raw: PackedFloat32Array, nb: i64, bin_s: f64, beats: PackedFloat32Array) -> PackedFloat32Array {
+        if nb < 0 || raw.len() < nb as usize * 3 || !(bin_s > 0.0) {
+            return PackedFloat32Array::new();
+        }
+        let s = on_the_drop::sections::analyse(raw.as_slice(), nb as usize, bin_s, beats.as_slice());
+        PackedFloat32Array::from(s.as_slice())
     }
 
     /// The track record of decoded stereo frames at `rate` Hz:

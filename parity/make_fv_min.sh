@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 # Makes the minimal Godot project the parity harness runs the GDScript in:
 # frame-visualizer's lib/ and test/song_map_synth.gd from a git ref (default
-# master), with no autoloads (nothing starts the player). Does not touch the
+# FV_REF: 2ae8592, the last commit with the GDScript analysis; later
+# frame-visualizer commits call on-the-drop instead), with no autoloads (nothing starts the player). Does not touch the
 # frame-visualizer checkout (git archive reads the object store only).
 #   parity/make_fv_min.sh <frame-visualizer repo> <out dir> [ref]
 set -euo pipefail
-FV_REPO="$1"; OUT="$2"; REF="${3:-master}"
+FV_REF=2ae85920373c72f81ba8eca583a7edc6a7bc40bd  # frame-visualizer master 2ae8592, the reference of the port
+FV_REPO="$1"; OUT="$2"; REF="${3:-$FV_REF}"
 rm -rf "$OUT"; mkdir -p "$OUT"
+git -C "$FV_REPO" cat-file -e "$REF^{commit}" || { echo "no commit $REF in $FV_REPO" >&2; exit 1; }
 git -C "$FV_REPO" archive "$REF" lib test/song_map_synth.gd | tar -x -C "$OUT"
 git -C "$FV_REPO" rev-parse "$REF" > "$OUT/FV_COMMIT"
 cat > "$OUT/project.godot" <<'EOF'

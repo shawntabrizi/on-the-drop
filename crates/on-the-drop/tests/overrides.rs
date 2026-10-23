@@ -177,6 +177,19 @@ fn labels_file_round_trip_and_fv_file() {
     let fv = r#"{"tracks": {"9f0c": {"file": "a.ogg", "labels": [{"start": 80.0, "end": 112.0, "auto": "Drop", "label": "Breakdown"}]}}}"#;
     let l = labels_from_json(fv).expect("fv file loads");
     assert_eq!(l.tracks["9f0c"].labels[0].label, "Breakdown");
+    // Why: a frame-visualizer entry keyed by a track record carries that
+    // record, so a re-encoded copy (another exact key) can find it by
+    // fingerprint; a label change must keep the record, or the next
+    // device's copy loses the labels.
+    let rec = on_the_drop::track_id::TrackRecord::new(&[1, 2, 3], 128.0, 44100);
+    let mut lt = Labels::default();
+    lt.tracks.insert(rec.key.clone(), on_the_drop::overrides::TrackLabels { file: "a.ogg".into(), labels: vec![], track: Some(rec.clone()) });
+    let mut m2 = dance();
+    let mut s2 = session(&mut m2, &mut lt, &rec.key.clone());
+    s2.set_label(&mut m2, &mut lt, 4, "Breakdown");
+    let back = labels_from_json(&labels_to_json(&lt)).unwrap();
+    assert_eq!(back.tracks[&rec.key].track.as_ref(), Some(&rec), "the record survives a label change and the file");
+    assert_eq!(back.tracks[&rec.key].labels.len(), 1);
     // Why: a file from a newer format must not be read as if it were ours.
     let newer = js.replace("\"version\": 1", "\"version\": 2");
     assert!(labels_from_json(&newer).is_err(), "a newer labels version is refused");

@@ -52,6 +52,11 @@ pub struct TrackLabels {
     #[serde(default)]
     pub file: String,
     pub labels: Vec<Label>,
+    /// The track's identity (fingerprint), so another key of the same
+    /// recording finds these labels ([`crate::track_id::same_track`]).
+    /// Absent in frame-visualizer's old file-hash entries.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub track: Option<crate::track_id::TrackRecord>,
 }
 
 /// All stored labels: track key -> labels.
@@ -237,7 +242,8 @@ impl LabelSession {
         if out.is_empty() {
             labels.tracks.remove(&self.key);
         } else {
-            labels.tracks.insert(self.key.clone(), TrackLabels { file: self.file.clone(), labels: out });
+            let track = labels.tracks.get(&self.key).and_then(|t| t.track.clone());
+            labels.tracks.insert(self.key.clone(), TrackLabels { file: self.file.clone(), labels: out, track });
         }
     }
 

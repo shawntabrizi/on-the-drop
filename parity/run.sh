@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Parity harness driver: GDScript (frame-visualizer master) vs Rust, per input.
+# Parity harness driver: GDScript (frame-visualizer 2ae8592) vs Rust, per input.
 #   parity/run.sh <fv-min> <out dir> <input> ...
 # <fv-min>: a Godot project that holds frame-visualizer's lib/ and
-#   test/song_map_synth.gd (parity/make_fv_min.sh makes one from master).
+#   test/song_map_synth.gd (parity/make_fv_min.sh makes one from 2ae8592).
 # <input>: a .wav / .mp3 file, synth:<form> or bins:<form> (see fv_dump.gd).
 # Per input: GDScript dump (+ PCM), Rust stage A (from the GDScript bins) and
 # stage B (from the PCM); the PCM is deleted after use. Then compare.py a / b.

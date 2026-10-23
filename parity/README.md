@@ -1,12 +1,19 @@
 # Parity harness: GDScript vs Rust
 
 Checks that the Rust core gives the same results as frame-visualizer's
-GDScript analysis (master: `lib/song_overview.gd`, `lib/song_map.gd`,
+GDScript analysis (`lib/song_overview.gd`, `lib/song_map.gd`,
 `lib/song_sections.gd`, `lib/song_novelty.gd`) on the same input.
+
+The reference is frame-visualizer commit `2ae8592` (pinned in
+`make_fv_min.sh`). Later frame-visualizer commits (branch `fv-rust` on)
+call this library and no longer hold the GDScript analysis; git history
+keeps it, so `git archive 2ae8592` still works. Pass another ref only to
+compare against an older GDScript version.
 
 - `make_fv_min.sh <frame-visualizer repo> <dir> [ref]` — a minimal Godot
   project with frame-visualizer's `lib/` and `test/song_map_synth.gd` at a git
-  ref (`git archive`: the checkout is not touched), imported headless.
+  ref (default `2ae8592`; `git archive`: the checkout is not touched),
+  imported headless.
 - `fv_dump.gd` — GDScript side: decodes each input as the app does
   (`SongOverview.build` at 44.1 kHz) and writes the map, the band bins it
   computed and the decoded frames.

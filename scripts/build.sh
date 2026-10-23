@@ -11,7 +11,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT=$(pwd)
 WHAT="${1:-all}"
-DEPS="$ROOT/.deps"
+DEPS="${OTD_DEPS:-$ROOT/.deps}"  # OTD_DEPS: share one Zig download between checkouts
+TGT="${CARGO_TARGET_DIR:-target}"  # cargo honours CARGO_TARGET_DIR; so do the copies below
 OUT="$ROOT/godot/bin"
 LIB=on_the_drop_godot
 GLIBC=2.28           # Frame has glibc 2.39; lower target = wider support.
@@ -36,7 +37,7 @@ zig_fetch() {
 
 build_macos() {
   cargo build -p on-the-drop-godot --release --target aarch64-apple-darwin
-  cp -f "target/aarch64-apple-darwin/release/lib$LIB.dylib" "$OUT/lib$LIB.macos.arm64.dylib"
+  cp -f "$TGT/aarch64-apple-darwin/release/lib$LIB.dylib" "$OUT/lib$LIB.macos.arm64.dylib"
   codesign -f -s - "$OUT/lib$LIB.macos.arm64.dylib" 2>/dev/null || true
   echo "== macos: $(du -h "$OUT/lib$LIB.macos.arm64.dylib" | cut -f1)"
   otool -L "$OUT/lib$LIB.macos.arm64.dylib"
@@ -51,7 +52,7 @@ build_linux() {
   export ZIG_GLOBAL_CACHE_DIR="$DEPS/zig-cache" ZIG_LOCAL_CACHE_DIR="$DEPS/zig-cache"
   cargo zigbuild -p on-the-drop-godot --release --target "aarch64-unknown-linux-gnu.$GLIBC"
   local so="$OUT/lib$LIB.linux.arm64.so"
-  cp -f "target/aarch64-unknown-linux-gnu/release/lib$LIB.so" "$so"
+  cp -f "$TGT/aarch64-unknown-linux-gnu/release/lib$LIB.so" "$so"
   echo "== linux-arm64: $(du -h "$so" | cut -f1)"
   if [ -x "$LLVM_BIN/llvm-readelf" ]; then
     "$LLVM_BIN/llvm-readelf" -h "$so" | grep -E "Class|Machine"
