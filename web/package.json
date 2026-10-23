@@ -1,0 +1,25 @@
+{
+  "name": "on-the-drop-web",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT OR Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "wasm": "../scripts/build_wasm.sh",
+    "dev": "node scripts/check-wasm.mjs && vite",
+    "build": "node scripts/check-wasm.mjs && tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "node scripts/check-wasm.mjs && vitest run"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/three": "0.186.0",
+    "fake-indexeddb": "6.2.5",
+    "typescript": "6.0.3",
+    "vite": "7.3.7",
+    "vitest": "5.0.3"
+  }
+}
