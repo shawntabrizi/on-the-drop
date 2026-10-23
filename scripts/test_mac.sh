@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs the Godot spike test headless and silent on the Mac (no window, Dummy audio).
+# Runs the Godot test (godot/test/spike.gd) headless and silent on the Mac (no window, Dummy audio).
 # Needs: scripts/build.sh macos first. Exit 0 only if the log shows "otd-spike: PASS".
 set -uo pipefail
 cd "$(dirname "$0")/.."
