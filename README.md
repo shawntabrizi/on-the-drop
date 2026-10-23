@@ -41,7 +41,10 @@ track.
 Godot (`OnTheDrop`, all static): `analyze(PackedVector2Array, rate)`,
 `analyze_mono(PackedFloat32Array, rate)`, `analyze_bins(raw, nb, bin_s, air)`
 -> a Dictionary in frame-visualizer's `SongMap.to_dict` shape plus `levels`,
-`bins`, `bin_s`, `analysis` (empty on bad input); `fingerprint(frames, rate)`
+`bins`, `bin_s`, `analysis`, the diagnostics `part_bounds`, `fixed_tempo`,
+`grid_drift` and the bins `bin_raw`, `bin_air` (empty on bad input);
+`sections(raw, nb, bin_s, beats)` -> the raw section changes;
+`fingerprint(frames, rate)`
 -> the track record; `matches(fp_a, dur_a, fp_b, dur_b)` -> `matched`,
 `cover`, `score`, `offset` (s); `version()`, `analysis_version()`.
 
@@ -76,7 +79,8 @@ decide then.
   TrackRecord?, "map": {...}}`): the `SongMap.to_dict` fields. A map of
   another `analysis` version is refused (analyse again).
 - Labels (`{"format": "on-the-drop/labels", "version": 1, "tracks": {key:
-  {"file", "labels": [{"start", "end", "auto", "label"}]}}}`): the user's
+  {"file", "labels": [{"start", "end", "auto", "label"}], "track"?:
+  TrackRecord}}}`): the user's
   section labels; frame-visualizer's `section_labels.json` (no `format`)
   reads as version 1.
 

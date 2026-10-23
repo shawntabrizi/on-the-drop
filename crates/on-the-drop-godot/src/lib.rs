@@ -32,7 +32,9 @@ fn text(s: &str) -> Variant {
 
 /// The map in frame-visualizer's `SongMap.to_dict` shape (packed arrays,
 /// finale as a Vector2), plus the overview: "levels" (3 bytes per bin),
-/// "bins", "bin_s" and "analysis" (the analysis version).
+/// "bins", "bin_s" and "analysis" (the analysis version); the diagnostics
+/// "part_bounds", "fixed_tempo", "grid_drift"; and the bins "bin_raw",
+/// "bin_air" (the analyze_bins input).
 fn analysis_dict(a: &Analysis) -> VarDictionary {
     let m = MapData::from(&a.map);
     let mut d = VarDictionary::new();
@@ -64,6 +66,10 @@ fn analysis_dict(a: &Analysis) -> VarDictionary {
     d.set("part_bounds", &f32s(&a.map.part_bounds));
     d.set("fixed_tempo", &a.map.fixed_tempo.to_variant());
     d.set("grid_drift", &a.map.grid_drift.to_variant());
+    // The band bins themselves (3 per bin, low / mid / high; and the air
+    // band, 1 per bin), for tools that cache them and re-run analyze_bins.
+    d.set("bin_raw", &f32s(&a.bins.raw));
+    d.set("bin_air", &f32s(&a.bins.air));
     d
 }
 
