@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="Prepare tracks for on-the-drop: beats, drops and sections, analysed in your browser. Nothing is uploaded." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='14' r='3' fill='%23ffb347'/%3E%3Cg stroke='%23ffb347' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M16 4v4M16 20v4M6 14h4M22 14h4M9 7l3 3M23 7l-3 3M9 21l3-3M23 21l-3-3'/%3E%3C/g%3E%3C/svg%3E" />
+    <title>on-the-drop</title>
+  </head>
+  <body>
+    <canvas id="stage" aria-label="Fireworks over water, driven by the track" role="img"></canvas>
+    <div id="app">
+      <header>
+        <button id="libraryToggle" class="ghost only-narrow" aria-controls="library" aria-expanded="false">Library</button>
+        <h1><span class="spark" aria-hidden="true">✦</span> on-the-drop</h1>
+        <nav aria-label="Actions">
+          <label class="btn" for="pickFiles">Add files</label>
+          <label class="btn" for="pickFolder">Add folder</label>
+          <button id="importLabels" class="btn">Import labels</button>
+          <button id="exportLabels" class="btn">Export labels</button>
+          <button id="exportMap" class="btn" disabled>Export map</button>
+          <button id="immersive" class="btn" aria-pressed="false" title="Hide the panels (V)">Visual only</button>
+          <button id="openSettings" class="btn">Settings</button>
+        </nav>
+        <input id="pickFiles" type="file" accept="audio/*,.mp3,.wav,.flac,.ogg,.opus,.m4a,.aac" multiple hidden />
+        <input id="pickFolder" type="file" webkitdirectory multiple hidden />
+        <input id="pickLabels" type="file" accept=".json,application/json" hidden />
+      </header>
+
+      <aside id="library" aria-label="Library">
+        <div class="lib-head">
+          <h2>Library</h2>
+          <span id="libCount" class="muted"></span>
+        </div>
+        <div id="progress" class="progress" hidden>
+          <div class="progress-text" id="progressText" aria-live="polite"></div>
+          <div class="bar"><div id="progressBar"></div></div>
+        </div>
+        <ul id="tracks" class="tracks"></ul>
+        <p class="privacy">🔒 Local only. Your audio is decoded and analysed in this browser and is never uploaded. Results and labels stay in this browser's storage.</p>
+      </aside>
+
+      <section id="empty" class="empty">
+        <div class="card">
+          <h2>Drop audio files here</h2>
+          <p>Add a track or a whole folder. on-the-drop finds the beats, the drops and the sections, and lights them up.</p>
+          <div class="row">
+            <label class="btn primary" for="pickFiles">Add files</label>
+            <label class="btn" for="pickFolder">Add folder</label>
+          </div>
+          <p class="privacy">🔒 Nothing is uploaded. Files are decoded and analysed on this device, and the results stay in this browser.</p>
+        </div>
+      </section>
+
+      <section id="dock" aria-label="Timeline">
+        <div class="transport">
+          <button id="play" class="play" aria-label="Play" disabled>▶</button>
+          <div class="now">
+            <div id="trackName" class="track-name">No track</div>
+            <div class="meta"><span id="clock">0:00 / 0:00</span><span id="bpm"></span><span id="nowSection"></span></div>
+          </div>
+          <div id="status" class="status" aria-live="polite"></div>
+          <button id="immersiveExit" class="btn" title="Show the panels (V)">Show panels</button>
+        </div>
+        <canvas class="overview" aria-label="Song overview: click to seek"></canvas>
+        <div class="sections" role="group" aria-label="Sections: click to change a label"></div>
+        <canvas class="zoom" aria-label="Zoomed view: beats, downbeats, drops and sections"></canvas>
+        <div class="legend" aria-hidden="true">
+          <span><i style="--c:#4c5d82"></i>calm</span><span><i style="--c:#d39a32"></i>build</span><span><i style="--c:#e5486a"></i>drop</span><span><i style="--c:#2fa59b"></i>breakdown</span><span>✱ your label</span><span class="keys">Space play · ←/→ bar</span>
+        </div>
+      </section>
+    </div>
+
+    <div id="dropOverlay" class="drop-overlay" hidden><div>Drop to analyse locally</div></div>
+
+    <dialog id="settings" aria-labelledby="settingsTitle">
+      <form method="dialog">
+        <h2 id="settingsTitle">Settings</h2>
+        <label class="switch"><input type="checkbox" id="reduceFlashing" /> <span>Reduce flashing</span></label>
+        <p class="muted">Softens the brightness peaks of bursts and stops the glitter strobe.</p>
+        <label for="latency">Latency offset: <output id="latencyOut">0 ms</output></label>
+        <input type="range" id="latency" min="-300" max="300" step="5" value="0" />
+        <p class="muted">Move it right if bursts come before the beat you hear (Bluetooth headphones are often 150–250 ms late).</p>
+        <p class="muted privacy">🔒 Local only: no uploads, no analytics, no external requests.</p>
+        <div class="row end"><button id="clearLibrary" type="button" class="btn danger">Clear library…</button><button class="btn primary" value="close">Done</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="notice" aria-labelledby="noticeTitle">
+      <form method="dialog">
+        <h2 id="noticeTitle">Photosensitivity notice</h2>
+        <p>This visual shows bright bursts and flashing light in time with the music. It may affect people with photosensitive epilepsy.</p>
+        <label class="switch"><input type="checkbox" id="noticeReduce" /> <span>Reduce flashing</span></label>
+        <p class="muted">You can change this later in Settings.</p>
+        <div class="row end"><button class="btn primary" value="ok">Continue</button></div>
+      </form>
+    </dialog>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

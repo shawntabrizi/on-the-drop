@@ -30,6 +30,35 @@ scripts/export_pck.sh       # build/otd-spike.pck
 FRAME=user@host scripts/frame_check.sh  # on the Frame: ~/apps/otd-spike/, headless, Dummy audio
 ```
 
+## Web app
+
+`web/` is a browser tool to prepare tracks, with a fireworks visual
+(Vite, TypeScript, three.js). Add files or a whole folder (picker or drag
+and drop). The app decodes them with Web Audio, and a Web Worker runs the
+analysis and the track ID in WebAssembly (`crates/on-the-drop-wasm`, the
+same results as native). The timeline shows the waveform, the beats and
+downbeats, the drops with their strength and the sections. Click a
+section to change its label (✱ marks your labels; "Reset to auto" undoes
+a change). Export the labels (`on-the-drop/labels`) or a track's map
+(`on-the-drop/map`); import labels from another browser. The fireworks
+burst on the beats of the map.
+
+**Privacy: local only.** Nothing is uploaded. The audio stays on your
+device; the results and labels stay in the browser's IndexedDB. The app
+makes no requests to other sites, and has no analytics.
+
+Run it locally (needs Rust with the `wasm32-unknown-unknown` target,
+`wasm-bindgen-cli` 0.2.129 and Node 22):
+
+```sh
+cargo install wasm-bindgen-cli --version =0.2.129 --locked
+cd web
+npm ci
+npm run wasm   # scripts/build_wasm.sh: the binding into web/src/wasm/
+npm run dev    # http://localhost:5173
+npm test       # web tests; scripts/wasm_test.sh: native vs wasm parity
+```
+
 ## API
 
 Core (`on_the_drop`): `analyze_stereo(frames, rate)`, `analyze_mono`,

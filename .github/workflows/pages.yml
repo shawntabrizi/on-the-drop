@@ -1,0 +1,108 @@
+# The web app (web/): tests on pull requests; on a push to master, the tests,
+# then the build (base /on-the-drop/) deployed to GitHub Pages.
+name: Web app
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  # Pinned: must equal the wasm-bindgen crate version (crates/on-the-drop-wasm).
+  WASM_BINDGEN_VERSION: 0.2.129
+  WASM_BINDGEN_SHA256: 82d12bb940e2d4e72e0d5605387fc1b8ca179044e012b620f0ce4e7440e8320e
+  NODE_VERSION: 22
+
+jobs:
+  test:
+    name: cargo test, wasm parity, web tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rust (rust-toolchain.toml) and the wasm32 target
+        run: |
+          rustup show active-toolchain
+          rustup target add wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - name: wasm-bindgen-cli ${{ env.WASM_BINDGEN_VERSION }}
+        run: |
+          f=wasm-bindgen-$WASM_BINDGEN_VERSION-x86_64-unknown-linux-musl
+          curl -sSLf -o /tmp/wbg.tar.gz "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/$WASM_BINDGEN_VERSION/$f.tar.gz"
+          echo "$WASM_BINDGEN_SHA256  /tmp/wbg.tar.gz" | sha256sum -c -
+          tar xzf /tmp/wbg.tar.gz -C /tmp
+          echo "/tmp/$f" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: cargo test
+        run: cargo test --workspace
+      - name: wasm parity (the native half ran in cargo test)
+        env:
+          CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER: wasm-bindgen-test-runner
+        run: cargo test -p on-the-drop-wasm --test parity --target wasm32-unknown-unknown
+      - name: web tests and build
+        working-directory: web
+        run: |
+          npm ci
+          npm run wasm
+          npm test
+          npm run build
+
+  build:
+    name: Build the Pages site
+    if: github.event_name != 'pull_request'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup target add wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - name: wasm-bindgen-cli ${{ env.WASM_BINDGEN_VERSION }}
+        run: |
+          f=wasm-bindgen-$WASM_BINDGEN_VERSION-x86_64-unknown-linux-musl
+          curl -sSLf -o /tmp/wbg.tar.gz "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/$WASM_BINDGEN_VERSION/$f.tar.gz"
+          echo "$WASM_BINDGEN_SHA256  /tmp/wbg.tar.gz" | sha256sum -c -
+          tar xzf /tmp/wbg.tar.gz -C /tmp
+          echo "/tmp/$f" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Build
+        working-directory: web
+        env:
+          BASE: /on-the-drop/
+        run: |
+          npm ci
+          npm run wasm
+          npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
